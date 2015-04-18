@@ -6,6 +6,8 @@ Account = Model.get('account.account')
 FiscalYear = Model.get('account.fiscalyear')
 Sequence = Model.get('ir.sequence')
 SequenceStrict = Model.get('ir.sequence.strict')
+PaymentTerm = Model.get('account.invoice.payment_term')
+PaymentTermLine = Model.get('account.invoice.payment_term.line')
 
 
 def fiscal_year(date, company, post_move_seq):
@@ -56,6 +58,13 @@ def account_payable(company):
             ('company', '=', company.id),
             ])
     return payable
+
+
+def payment_term_cash():
+    payment_term = PaymentTerm(name='Cash Payment')
+    payment_term_line = PaymentTermLine(type='remainder')
+    payment_term.lines.append(payment_term_line)
+    return payment_term
 
 
 def chart_of_accounts(company):
