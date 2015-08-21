@@ -7,9 +7,10 @@ __all__ = ['init_database', 'drop_database']
 
 
 def init_database():
+
+    from trytond.tests.test_tryton import drop_create
+    drop_create()
     config = pconfig.set_trytond()
-    os.environ['DB_NAME'] = config.database_name
-    config.pool.test = True
     return config
 
 
