@@ -12,7 +12,7 @@ __all__ = ['get_uom', 'get_uom_by_xml_id', 'create_uom',
     'get_product_attribute', 'create_product_attribute']
 
 
-def get_uom(config, name, category):
+def get_uom(name, category):
     Uom = Model.get('product.uom')
     uoms = Uom.find([
             ('name', '=', name),
@@ -20,10 +20,10 @@ def get_uom(config, name, category):
             ])
     if uoms:
         return uoms[0]
-    return create_uom(config, name, name[0], category)
+    return create_uom(name, name[0], category)
 
 
-def get_uom_by_xml_id(config, module, fs_id):
+def get_uom_by_xml_id(module, fs_id):
     ModelData = Model.get('ir.model.data')
     Uom = Model.get('product.uom')
 
@@ -34,7 +34,7 @@ def get_uom_by_xml_id(config, module, fs_id):
     return Uom(data[0].db_id)
 
 
-def create_uom(config, name, symbol, category, rate=None, rounding=None,
+def create_uom(name, symbol, category, rate=None, rounding=None,
         digits=None):
     Uom = Model.get('product.uom')
     uom = Uom()
@@ -50,17 +50,17 @@ def create_uom(config, name, symbol, category, rate=None, rounding=None,
     return uom
 
 
-def get_template(config, name, no_create=False):
+def get_template(name, no_create=False):
     ProductTemplate = Model.get('product.template')
     templates = ProductTemplate.find([('name', '=', name)])
     if templates:
         return templates[0]
     if no_create:
         return
-    return create_template(config, name)
+    return create_template(name)
 
 
-def create_template(config, name, type='goods', unit=None, list_price=None,
+def create_template(name, type='goods', unit=None, list_price=None,
         cost_price=None, salable=False, purchasable=False,
         account_expense=None, account_revenue=None,
         customer_taxes=None, supplier_taxes=None):
@@ -72,7 +72,7 @@ def create_template(config, name, type='goods', unit=None, list_price=None,
         return templates[0]
 
     if unit is None:
-        unit = get_uom_by_xml_id(config, 'product', 'uom_unit')
+        unit = get_uom_by_xml_id('product', 'uom_unit')
 
     template = Template()
     template.name = name
@@ -89,9 +89,9 @@ def create_template(config, name, type='goods', unit=None, list_price=None,
     if purchasable and 'purchasable' in Template._fields:
         template.purchasable = True
     template.account_expense = (account_expense if account_expense is not None
-        else get_account_expense(config))
+        else get_account_expense())
     template.account_revenue = (account_revenue if account_revenue is not None
-        else get_account_revenue(config))
+        else get_account_revenue())
     if customer_taxes:
         for tax in customer_taxes:
             template.customer_taxes.append(Tax(tax.id))
@@ -102,7 +102,7 @@ def create_template(config, name, type='goods', unit=None, list_price=None,
     return template
 
 
-def get_price_list(config, name, company):
+def get_price_list(name, company):
     PriceList = Model.get('product.price_list')
     price_lists = PriceList.find([
             ('name', '=', name),
@@ -110,10 +110,10 @@ def get_price_list(config, name, company):
             ])
     if price_lists:
         return price_lists[0]
-    return create_price_list(config, name, company)
+    return create_price_list(name, company)
 
 
-def create_price_list(config, name, company):
+def create_price_list(name, company):
     ProductPriceList = Model.get('product.price_list')
     product_price_list = ProductPriceList()
     product_price_list.name = name
@@ -121,15 +121,15 @@ def create_price_list(config, name, company):
     return product_price_list
 
 
-def get_product_attribute(config, name, n_values=None):
+def get_product_attribute(name, n_values=None):
     Attribute = Model.get('product.attribute')
     attributes = Attribute.find([('name', '=', name)])
     if attributes:
         return attributes[0]
-    return create_product_attribute(config, name, n_values=n_values)
+    return create_product_attribute(name, n_values=n_values)
 
 
-def create_product_attribute(config, name, n_values=None):
+def create_product_attribute(name, n_values=None):
     Attribute = Model.get('product.attribute')
 
     attribute = Attribute()

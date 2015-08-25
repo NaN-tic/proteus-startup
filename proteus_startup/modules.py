@@ -5,7 +5,7 @@ from proteus import Model, Wizard
 __all__ = ['install_modules']
 
 
-def install_modules(config, modules):
+def install_modules(modules):
     Module = Model.get('ir.module.module')
 
     assert isinstance(modules, (basestring, list))
@@ -14,5 +14,6 @@ def install_modules(config, modules):
 
     modules = Module.find([('name', 'in', modules)])
     # 3.6 Module.click(modules, 'install')
-    Module.install([m.id for m in modules], config.context)
+    for module in modules:
+        module.click('install')
     Wizard('ir.module.module.install_upgrade').execute('upgrade')

@@ -10,8 +10,7 @@ __all__ = ['create_account_chart', 'create_fiscal_year',
     'get_payment_term_cash']
 
 
-def create_fiscal_year(config, date, company, post_move_seq,
-        invoice_sequence=None):
+def create_fiscal_year(date, company, post_move_seq, invoice_sequence=None):
     FiscalYear = Model.get('account.fiscalyear')
 
     fiscal_year = FiscalYear(name=str(date.year))
@@ -27,34 +26,34 @@ def create_fiscal_year(config, date, company, post_move_seq,
     return fiscal_year
 
 
-def get_post_move_sequence(config, name, company):
+def get_post_move_sequence(name, company):
     Sequence = Model.get('ir.sequence')
     return Sequence(name=name, code='account.move', company=company)
 
 
-def get_invoice_sequence(config, name, company):
+def get_invoice_sequence(name, company):
     SequenceStrict = Model.get('ir.sequence.strict')
     return SequenceStrict(name=name, code='account.invoice',
         company=company)
 
 
-def get_account_expense(config, company=None):
-    return _get_account_by_type(config, 'expense', company=company)
+def get_account_expense(company=None):
+    return _get_account_by_type('expense', company=company)
 
 
-def get_account_revenue(config, company=None):
-    return _get_account_by_type(config, 'revenue', company=company)
+def get_account_revenue(company=None):
+    return _get_account_by_type('revenue', company=company)
 
 
-def get_account_receivable(config, company=None):
-    return _get_account_by_type(config, 'receivable', company=company)
+def get_account_receivable(company=None):
+    return _get_account_by_type('receivable', company=company)
 
 
-def get_account_payable(config, company=None):
-    return _get_account_by_type(config, 'payable', company=company)
+def get_account_payable(company=None):
+    return _get_account_by_type('payable', company=company)
 
 
-def _get_account_by_type(config, type, company=None):
+def _get_account_by_type(type, company=None):
     Account = Model.get('account.account')
     domain = [
         ('kind', '=', type),
@@ -66,7 +65,7 @@ def _get_account_by_type(config, type, company=None):
         return accounts[0]
 
 
-def get_payment_term_cash(config):
+def get_payment_term_cash():
     PaymentTerm = Model.get('account.invoice.payment_term')
     PaymentTermLine = Model.get('account.invoice.payment_term.line')
 
@@ -79,8 +78,7 @@ def get_payment_term_cash(config):
     return payment_term
 
 
-def create_account_chart(config, company, module=None, fs_id=None,
-        digits=None):
+def create_account_chart(company, module=None, fs_id=None, digits=None):
     """
     Creates the chart of accounts defined by module and fs_id for the given
     company.

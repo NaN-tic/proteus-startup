@@ -9,17 +9,17 @@ from .country import get_country, get_subdivision
 __all__ = ['get_party', 'create_party']
 
 
-def get_party(config, name, no_create=False):
+def get_party(name, no_create=False):
     Party = Model.get('party.party')
     parties = Party.find([('name', '=', name)])
     if parties:
         return parties[0]
     if no_create:
         return
-    return create_party(config, name)
+    return create_party(name)
 
 
-def create_party(config, name, lang_code='ca_ES',
+def create_party(name, lang_code='ca_ES',
         address_name=None, street=None, zip=None, city=None,
         subdivision_code=None, country_code='ES',
         phone=None, website=None,
@@ -36,8 +36,8 @@ def create_party(config, name, lang_code='ca_ES',
     if parties:
         return parties[0]
 
-    country = get_country(config, country_code)
-    subdivision = get_subdivision(config, country, subdivision_code,
+    country = get_country(country_code)
+    subdivision = get_subdivision(country, subdivision_code,
         no_create=True)
 
     if zip is None:
@@ -62,7 +62,7 @@ def create_party(config, name, lang_code='ca_ES',
         party.contact_mechanisms.append(
             ContactMechanism(type='website',
                 value=website))
-    party.lang = get_language(config, lang_code)
+    party.lang = get_language(lang_code)
 
     if account_payable:
         party.account_payable = account_payable

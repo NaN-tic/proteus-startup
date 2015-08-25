@@ -5,7 +5,7 @@ from proteus import Model
 __all__ = ['create_sale_shop', 'create_sale']
 
 
-def create_sale_shop(config, name, company, warehouse, currency, price_list,
+def create_sale_shop(name, company, warehouse, currency, price_list,
               payment_term, sale_invoice_method='order',
               sale_shipment_method='order', sale_sequence=None, address=None,
               users=None):
@@ -38,7 +38,7 @@ def create_sale_shop(config, name, company, warehouse, currency, price_list,
     return shop
 
 
-def create_sale(config, party, shop=None, company=None, invoice_address=None,
+def create_sale(party, shop=None, company=None, invoice_address=None,
         shipment_address=None, payment_term=None, warehouse=None,
         currency=None):
     Sale = Model.get('sale.sale')

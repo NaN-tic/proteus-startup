@@ -5,7 +5,7 @@ from proteus import Model, Wizard
 __all__ = ['create_company']
 
 
-def create_company(config, party, currency):
+def create_company(party, currency):
     Company = Model.get('company.company')
 
     company_config = Wizard('company.company.config')

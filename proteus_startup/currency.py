@@ -11,7 +11,7 @@ today = datetime.datetime.combine(datetime.date.today(),
     datetime.datetime.min.time())
 
 
-def get_currency(config, code):
+def get_currency(code):
     Currency = Model.get('currency.currency')
     currencies = Currency.find([('code', '=', code)])
 
@@ -21,11 +21,11 @@ def get_currency(config, code):
     return None
 
 
-def get_dollar(config):
+def get_dollar():
     Currency = Model.get('currency.currency')
     CurrencyRate = Model.get('currency.currency.rate')
 
-    currency = get_currency(config, 'USD')
+    currency = get_currency('USD')
 
     if not currency:
         currency = Currency(name='US Dollar', symbol=u'$', code='USD',
@@ -41,11 +41,11 @@ def get_dollar(config):
     return currency
 
 
-def get_euro(config):
+def get_euro():
     Currency = Model.get('currency.currency')
     CurrencyRate = Model.get('currency.currency.rate')
 
-    currency = get_currency(config, 'EUR')
+    currency = get_currency('EUR')
 
     if not currency:
         currency = Currency(name='Euro', symbol=u'$', code='EUR',

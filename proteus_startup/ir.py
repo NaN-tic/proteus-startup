@@ -5,7 +5,7 @@ from proteus import Model
 __all__ = ['get_language']
 
 
-def get_language(config, code):
+def get_language(code):
     Lang = Model.get('ir.lang')
 
     if not code:
