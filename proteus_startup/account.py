@@ -118,11 +118,11 @@ def create_account_chart(config, company, module=None, fs_id=None,
     receivable, = Account.find([
             ('kind', '=', 'receivable'),
             ('company', '=', company.id),
-            ])
+            ], limit=1)
     payable, = Account.find([
             ('kind', '=', 'payable'),
             ('company', '=', company.id),
-            ])
+            ], limit=1)
     create_chart.form.account_receivable = receivable
     create_chart.form.account_payable = payable
     create_chart.execute('create_properties')
