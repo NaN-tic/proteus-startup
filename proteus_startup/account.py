@@ -70,6 +70,9 @@ def get_payment_term_cash(config):
     PaymentTerm = Model.get('account.invoice.payment_term')
     PaymentTermLine = Model.get('account.invoice.payment_term.line')
 
+    existing = PaymentTerm.find([('name', '=', 'Cash Payment')], limit=1)
+    if existing:
+        return existing[0]
     payment_term = PaymentTerm(name='Cash Payment')
     payment_term_line = PaymentTermLine(type='remainder')
     payment_term.lines.append(payment_term_line)
