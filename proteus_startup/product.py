@@ -60,46 +60,56 @@ def get_template(name, no_create=False):
     return create_template(name)
 
 
-def create_template(name, type='goods', unit=None, list_price=None,
-        cost_price=None, salable=False, purchasable=False,
-        account_expense=None, account_revenue=None,
-        customer_taxes=None, supplier_taxes=None):
+def create_template(**kwargs):
+
     Template = Model.get('product.template')
     Tax = Model.get('account.tax')
+
+    name = kwargs.get('name')
 
     templates = Template.find(['name', '=', name])
     if templates:
         return templates[0]
 
+    unit = kwargs.get('unit')
     if unit is None:
         unit = get_uom_by_xml_id('product', 'uom_unit')
 
     template = Template()
     template.name = name
-    template.type = type
-    template.default_uom = unit
-    template.list_price = (list_price if list_price is not None
-        else Decimal('40'))
-    template.cost_price = (cost_price if cost_price is not None
-        else Decimal('25'))
-    # if salable and 'hasattr(Template, 'salable'):
-    if salable and 'salable' in Template._fields:
-        template.salable = True
-    # if purchasable and hasattr(Template, 'purchasable'):
-    if purchasable and 'purchasable' in Template._fields:
-        template.purchasable = True
-    template.account_expense = (account_expense if account_expense is not None
-        else get_account_expense())
-    template.account_revenue = (account_revenue if account_revenue is not None
-        else get_account_revenue())
-    if customer_taxes:
-        for tax in customer_taxes:
-            template.customer_taxes.append(Tax(tax.id))
-    if supplier_taxes:
-        for tax in supplier_taxes:
-            template.supplier_taxes.append(Tax(tax.id))
+
+    for key, value in kwargs.iteritems():
+        if key in Template._fields:
+            if key in 'customer_taxes' and value:
+                for tax in value:
+                    template.customer_taxes.append(Tax(tax.id))
+                continue
+            if key == 'supplier_taxes' and value:
+                for tax in value:
+                    template.supplier_taxes.append(Tax(tax.id))
+                continue
+
+            setattr(template, key, value)
+
+    # Define Required fields with defaults if not already set.
+
+    if 'default_uom' not in kwargs:
+        template.default_uom = get_uom_by_xml_id('product', 'uom_unit')
+
+    if 'list_price' not in kwargs:
+        template.list_price = Decimal('10.00')
+
+    if 'account_expense' not in kwargs:
+        template.account_expense = get_account_expense()
+
+    if 'account_revenue' not in kwargs:
+        template.account_revenue = get_account_revenue()
+
+    if 'cost_price' not in kwargs:
+        template.cost_price = Decimal('5.45')
 
     return template
+
 
 
 def get_price_list(name, company):
