@@ -22,7 +22,7 @@ def get_party(name, no_create=False):
 def create_party(name, lang_code='ca_ES',
         address_name=None, street=None, zip=None, city=None,
         subdivision_code=None, country_code='ES',
-        phone=None, website=None,
+        phone=None, website=None, vat_country=None, vat_number=None,
         account_payable=None, account_receivable=None,
         customer_payment_term=None, supplier_payment_term=None,
         customer_payment_type=None, supplier_payment_type=None,
@@ -63,6 +63,11 @@ def create_party(name, lang_code='ca_ES',
             ContactMechanism(type='website',
                 value=website))
     party.lang = get_language(lang_code)
+
+    if vat_number:
+        if vat_country:
+            party.vat_country = vat_country
+        party.vat_number = vat_number
 
     if account_payable:
         party.account_payable = account_payable
