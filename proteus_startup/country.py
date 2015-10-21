@@ -6,6 +6,13 @@ __all__ = ['get_country', 'create_country', 'get_subdivision',
     'create_subdivision']
 
 
+def get_countries(codes):
+    Country = Model.get('country.country')
+    countries = Country.find([('code', 'in', codes)])
+    return {k.code:k for k in countries}
+
+    
+
 def get_country(country_code):
     Country = Model.get('country.country')
     countries = Country.find([('code', '=', country_code)])
