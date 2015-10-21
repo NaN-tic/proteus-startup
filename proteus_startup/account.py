@@ -7,7 +7,7 @@ __all__ = ['create_account_chart', 'create_fiscal_year',
     'get_post_move_sequence', 'get_invoice_sequence',
     'get_account_expense', 'get_account_revenue',
     'get_account_receivable', 'get_account_payable',
-    'get_payment_term_cash']
+    'get_payment_term_cash', 'get_payment_type']
 
 
 def create_fiscal_year(date, company, post_move_seq, invoice_sequence=None):
@@ -65,14 +65,24 @@ def _get_account_by_type(type, company=None):
         return accounts[0]
 
 
-def get_payment_term_cash():
+def get_payment_type(name):
+    PaymentType= Model.get('account.payment.type')
+    existing = PaymentType.find([('name', '=', name)], limit=1)
+    if existing:
+        return existing[0]
+    payment_type = PaymentType(name=name)
+    payment_type.kind='receivable'
+    return payment_type
+
+
+def get_payment_term_cash(name='Cash Payment'):
     PaymentTerm = Model.get('account.invoice.payment_term')
     PaymentTermLine = Model.get('account.invoice.payment_term.line')
 
-    existing = PaymentTerm.find([('name', '=', 'Cash Payment')], limit=1)
+    existing = PaymentTerm.find([('name', '=', name)], limit=1)
     if existing:
         return existing[0]
-    payment_term = PaymentTerm(name='Cash Payment')
+    payment_term = PaymentTerm(name=name)
     payment_term_line = PaymentTermLine(type='remainder')
     payment_term.lines.append(payment_term_line)
     return payment_term
