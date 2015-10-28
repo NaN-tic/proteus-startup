@@ -7,7 +7,69 @@ __all__ = ['create_account_chart', 'create_fiscal_year',
     'get_post_move_sequence', 'get_invoice_sequence',
     'get_account_expense', 'get_account_revenue',
     'get_account_receivable', 'get_account_payable',
-    'get_payment_term_cash', 'get_payment_type']
+    'get_payment_term_cash', 'get_payment_type', 'similar_account',
+    'get_code']
+
+
+def get_code(code, digits=7):
+    if len(code) > 4:
+        if code[-1] == '1':
+            code = code[:-1] + '0'
+        return code[0:4].ljust(len(code)-4, '0') + code[4:]
+    return code
+
+
+def similar_account(sim_account, vals):
+    Account = Model.get('account.account')
+    account = Account()
+
+    ignore_fields = ['id', 'code', 'name', 'childs', 'deferrals', 'taxes',
+        'create_date', 'create_uid', 'write_date', 'write_uid2']
+    for field in Account._fields:
+        if field in ignore_fields:
+            continue
+        value = getattr(sim_account, field)
+        setattr(account, field, value)
+
+    for k, v in vals.iteritems():
+        setattr(account, k, v)
+
+    return account
+
+
+def get_similar_code(chart, code, digits=7):
+
+    # print "code:", code
+    l = len(code)
+    if l > 4:
+        code = code[0:4].ljust(digits, '0')
+        if code in chart:
+            return code
+
+    for i in range(0, l):
+        # print i
+        code = code[:-i]
+        # print "code:", i,  code
+        if code in chart:
+            return code
+
+    return '0'
+
+
+def get_chart_tree(company, digits=7):
+    Account = Model.get('account.account')
+    accounts = Account.find([('company', '=', company)])
+    account_dict = {}
+    similar_dict = {}
+    for account in accounts:
+        code = account.code
+        account_dict[account.code] = account
+        if len(account.code) > 4:
+            code = code[0:4].rjust(digits, '0')
+        if not similar_dict.get(code):
+            similar_dict[code] = account
+
+    return account_dict, similar_dict
 
 
 def create_fiscal_year(date, company, post_move_seq, invoice_sequence=None):
@@ -66,12 +128,12 @@ def _get_account_by_type(type, company=None):
 
 
 def get_payment_type(name):
-    PaymentType= Model.get('account.payment.type')
+    PaymentType = Model.get('account.payment.type')
     existing = PaymentType.find([('name', '=', name)], limit=1)
     if existing:
         return existing[0]
     payment_type = PaymentType(name=name)
-    payment_type.kind='receivable'
+    payment_type.kind = 'receivable'
     return payment_type
 
 

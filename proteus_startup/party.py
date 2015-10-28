@@ -8,7 +8,20 @@ from .ir import get_language
 from .country import get_country, get_subdivision
 
 
-__all__ = ['get_party', 'create_party', 'create_address']
+__all__ = ['get_party', 'create_party', 'create_address', 'create_contact_mechanism']
+
+
+
+def create_contact_mechanism(**kwargs):
+    Contact = Model.get('party.contact.mechanism')
+    contact = Contact()
+    for key, value in kwargs.iteritems():        
+        if key in Contact._fields:
+            if not value:
+                continue      
+            setattr(contact, key, value)
+    return contact
+    
 
 
 def create_address(**kwargs):

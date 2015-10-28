@@ -2,7 +2,13 @@
 # copyright notices and license terms.
 from proteus import Model, Wizard
 
-__all__ = ['create_company']
+__all__ = ['create_company', 'get_company']
+
+
+def get_company(name):
+    Company = Model.get('company.company')
+    company,  = Company.find([('party.name', '=', name)])
+    return company
 
 
 # TODO: add default timezone='Europe/Madrid'?
