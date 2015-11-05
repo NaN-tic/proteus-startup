@@ -8,15 +8,21 @@ __all__ = ['create_account_chart', 'create_fiscal_year',
     'get_account_expense', 'get_account_revenue',
     'get_account_receivable', 'get_account_payable',
     'get_payment_term_cash', 'get_payment_type', 'similar_account',
-    'get_code']
+    'get_code', 'get_similar_account']
 
 
 def get_code(code, digits=7):
     if len(code) > 4:
-        if code[-1] == '1':
-            code = code[:-1] + '0'
-        return code[0:4].ljust(len(code)-4, '0') + code[4:]
+        if code[:3] in ('430', '400', '410', '401', '440', '431'):
+            return code[0:4].ljust(len(code), '0')
     return code
+
+
+def get_similar_account(code, chart, digits=7):
+    for digits in (digits, 4, 3, 2, 1):
+        account = chart.get(get_similar_code(chart, code))
+        if account:
+            return account
 
 
 def similar_account(sim_account, vals):
@@ -24,12 +30,19 @@ def similar_account(sim_account, vals):
     account = Account()
 
     ignore_fields = ['id', 'code', 'name', 'childs', 'deferrals', 'taxes',
-        'create_date', 'create_uid', 'write_date', 'write_uid2']
+        'create_date', 'create_uid', 'write_date', 'write_uid', 'template',
+        'parent']
     for field in Account._fields:
         if field in ignore_fields:
             continue
         value = getattr(sim_account, field)
         setattr(account, field, value)
+
+    if (sim_account.code and sim_account.parent and
+            len(vals.get('code', '')) == len(sim_account.code)):
+        account.parent = sim_account.parent
+    else:
+        account.parent = sim_account
 
     for k, v in vals.iteritems():
         setattr(account, k, v)
@@ -38,8 +51,6 @@ def similar_account(sim_account, vals):
 
 
 def get_similar_code(chart, code, digits=7):
-
-    # print "code:", code
     l = len(code)
     if l > 4:
         code = code[0:4].ljust(digits, '0')
@@ -47,29 +58,15 @@ def get_similar_code(chart, code, digits=7):
             return code
 
     for i in range(0, l):
-        # print i
-        code = code[:-i]
-        # print "code:", i,  code
-        if code in chart:
-            return code
-
-    return '0'
+        sub_code = code[:-i]
+        if sub_code in chart:
+            return sub_code
 
 
-def get_chart_tree(company, digits=7):
+def get_chart_tree(company):
     Account = Model.get('account.account')
     accounts = Account.find([('company', '=', company)])
-    account_dict = {}
-    similar_dict = {}
-    for account in accounts:
-        code = account.code
-        account_dict[account.code] = account
-        if len(account.code) > 4:
-            code = code[0:4].rjust(digits, '0')
-        if not similar_dict.get(code):
-            similar_dict[code] = account
-
-    return account_dict, similar_dict
+    return dict((a.code, a) for a in accounts)
 
 
 def create_fiscal_year(date, company, post_move_seq, invoice_sequence=None):
