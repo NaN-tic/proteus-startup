@@ -2,6 +2,7 @@
 # copyright notices and license terms.
 from proteus import Model, Wizard
 from dateutil.relativedelta import relativedelta
+from .common import create_model
 
 __all__ = ['create_account_chart', 'create_fiscal_year',
     'get_post_move_sequence', 'get_invoice_sequence',
@@ -69,28 +70,39 @@ def get_chart_tree(company):
     return dict((a.code, a) for a in accounts)
 
 
+@create_model('account.fiscalyear')
 def create_fiscal_year(date, company, post_move_seq, invoice_sequence=None):
-    FiscalYear = Model.get('account.fiscalyear')
-
-    fiscal_year = FiscalYear(name=str(date.year))
-    fiscal_year.start_date = date + relativedelta(month=1, day=1)
-    fiscal_year.end_date = date + relativedelta(month=12, day=31)
-    fiscal_year.company = company
-    fiscal_year.post_move_sequence = post_move_seq
+    values = {
+        'name': str(date.year),
+        'start_date': date + relativedelta(month=1, day=1),
+        'end_date': date + relativedelta(month=12, day=31),
+        'company': company,
+        'post_move_sequence': post_move_seq,
+    }
     if invoice_sequence is not None:
-        fiscal_year.out_invoice_sequence = invoice_sequence
-        fiscal_year.in_invoice_sequence = invoice_sequence
-        fiscal_year.out_credit_note_sequence = invoice_sequence
-        fiscal_year.in_credit_note_sequence = invoice_sequence
-    return fiscal_year
+        values['out_invoice_sequence'] = invoice_sequence
+        values['in_invoice_sequence'] = invoice_sequence
+        values['out_credit_note_sequence'] = invoice_sequence
+        values['in_credit_note_sequence'] = invoice_sequence
+    return values
 
 
+@create_model('ir.sequence')
 def get_post_move_sequence(name, company):
-    Sequence = Model.get('ir.sequence')
-    return Sequence(name=name, code='account.move', company=company)
+    return {
+        'name': name,
+        'code': 'account.move',
+        'company': company,
+        }
 
 
+@create_model('ir.sequence.strict')
 def get_invoice_sequence(name, company):
+    return {
+        'name': name,
+        'code': 'account.invoice',
+        'company': company,
+        }
     SequenceStrict = Model.get('ir.sequence.strict')
     return SequenceStrict(name=name, code='account.invoice',
         company=company)
@@ -119,7 +131,7 @@ def _get_account_by_type(type, company=None):
         ]
     if company:
         domain.append(('company', '=', company.id))
-    accounts = Account.find(domain)
+    accounts = Account.find(domain, limit=1)
     if accounts:
         return accounts[0]
 

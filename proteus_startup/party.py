@@ -1,45 +1,26 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
 from proteus import Model
+from .common import create_model
 
 
 __all__ = ['get_party', 'create_party', 'create_address',
     'create_contact_mechanism']
 
 
+@create_model('party.contact_mechanism')
 def create_contact_mechanism(**kwargs):
-    Contact = Model.get('party.contact_mechanism')
-    contact = Contact()
-    for key, value in kwargs.iteritems():
-        if key in Contact._fields:
-            if not value:
-                continue
-            setattr(contact, key, value)
-    return contact
+    pass
 
 
+@create_model('party.address')
 def create_address(**kwargs):
-    Address = Model.get('party.address')
-    address = Address()
-    for key, value in kwargs.iteritems():
-        if key in Address._fields:
-            if not value:
-                continue
-            setattr(address, key, value)
-    return address
+    pass
 
 
+@create_model('party.party')
 def create_party(**kwargs):
-
-    Party = Model.get('party.party')
-    party = Party()
-    for key, value in kwargs.iteritems():
-        if key in Party._fields:
-            if not value:
-                continue
-
-            setattr(party, key, value)
-    return party
+    pass
 
 
 def get_party(name, no_create=False):
@@ -49,4 +30,4 @@ def get_party(name, no_create=False):
         return parties[0]
     if no_create:
         return
-    return create_party(name)
+    return create_party(name=name)

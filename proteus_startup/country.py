@@ -1,5 +1,6 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
+from .common import create_model
 from proteus import Model
 
 __all__ = ['get_country', 'create_country', 'get_subdivision',
@@ -9,9 +10,8 @@ __all__ = ['get_country', 'create_country', 'get_subdivision',
 def get_countries(codes):
     Country = Model.get('country.country')
     countries = Country.find([('code', 'in', codes)])
-    return {k.code:k for k in countries}
+    return {k.code: k for k in countries}
 
-    
 
 def get_country(country_code):
     Country = Model.get('country.country')
@@ -24,12 +24,12 @@ def get_country(country_code):
     return country
 
 
+@create_model('country.country')
 def create_country(name, country_code):
-    Country = Model.get('country.country')
-    country = Country()
-    country.name = name
-    country.code = country_code
-    return country
+    return {
+        'name': name,
+        'code': country_code,
+        }
 
 
 def get_subdivision(country, subdivision_code, no_create=False):
@@ -50,10 +50,10 @@ def get_subdivision(country, subdivision_code, no_create=False):
     return subdivision
 
 
+@create_model('country.subdivision')
 def create_subdivision(country, name, subdivision_code):
-    Subdivision = Model.get('country.subdivision')
-    subdivision = Subdivision()
-    subdivision.country = country
-    subdivision.name = name
-    subdivision.code = subdivision_code
-    return subdivision
+    return {
+        'country': country,
+        'name': name,
+        'code': subdivision_code,
+        }
