@@ -21,3 +21,4 @@ from .product import *
 from .stock import *
 from .purchase import *
 from .sale import *
+from .quality import *
