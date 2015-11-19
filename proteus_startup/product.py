@@ -7,10 +7,40 @@ from .common import create_model
 from .account import get_account_expense, get_account_revenue
 
 
-__all__ = ['get_uom', 'get_uom_by_xml_id', 'create_uom',
+__all__ = ['get_uom_category', 'get_uom_category_by_xml_id',
+    'create_uom_category',
+    'get_uom', 'get_uom_by_xml_id', 'create_uom',
     'get_template', 'create_template',
     'get_price_list', 'create_price_list',
     'get_product_attribute', 'create_product_attribute']
+
+
+def get_uom_category(name):
+    Category = Model.get('product.uom.category')
+    categories = Category.find([
+            ('name', '=', name),
+            ])
+    if categories:
+        return categories[0]
+    return create_uom_category(name)
+
+
+def get_uom_category_by_xml_id(module, fs_id):
+    ModelData = Model.get('ir.model.data')
+    Category = Model.get('product.uom.category')
+
+    data = ModelData.find([
+            ('module', '=', module),
+            ('fs_id', '=', fs_id),
+            ], limit=1)
+    return Category(data[0].db_id)
+
+
+@create_model('product.uom.category')
+def create_uom_category(name):
+    return {
+        'name': name,
+        }
 
 
 def get_uom(name, category):
