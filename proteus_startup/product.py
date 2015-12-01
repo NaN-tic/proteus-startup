@@ -94,11 +94,7 @@ def get_template(name, no_create=False):
 
 @create_model('product.template')
 def create_template(**kwargs):
-    Template = Model.get('product.template')
     name = kwargs.get('name')
-    templates = Template.find(['name', '=', name])
-    if templates:
-        return templates[0]
 
     unit = kwargs.get('unit')
     if unit is None:
@@ -116,10 +112,9 @@ def create_template(**kwargs):
             ('account_expense', get_account_expense()),
             ('account_revenue', get_account_revenue()),
             ]:
-        if not field in kwargs:
+        if field not in kwargs:
             values[field] = default
     return values
-
 
 
 def get_price_list(name, company):
