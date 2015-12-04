@@ -1,7 +1,11 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
+from calendar import monthrange
+from collections import OrderedDict
+from datetime import date
 from proteus import Model, Wizard
 from dateutil.relativedelta import relativedelta
+import datetime
 from .common import create_model
 
 __all__ = ['create_account_chart', 'create_fiscal_year',
@@ -9,7 +13,8 @@ __all__ = ['create_account_chart', 'create_fiscal_year',
     'get_account_expense', 'get_account_revenue',
     'get_account_receivable', 'get_account_payable',
     'get_payment_term_cash', 'get_payment_type', 'similar_account',
-    'get_code', 'get_similar_account']
+    'get_code', 'get_similar_account', 'create_journal', 'create_move',
+    'create_move_line']
 
 
 def get_code(code, digits=7):
@@ -72,11 +77,23 @@ def get_chart_tree(company):
 
 @create_model('account.fiscalyear')
 def create_fiscal_year(date, company, post_move_seq, invoice_sequence=None):
+    Fiscalyear = Model.get('account.fiscalyear')
+    start_date = date + relativedelta(month=1, day=1)
+    end_date = date + relativedelta(month=12, day=31)
+    name = str(date.year)
+    fiscalyears = Fiscalyear.find([
+            ('name', '=', name),
+            ('start_date', '=', start_date),
+            ('end_date', '=', end_date),
+            ('company', '=', company.id),
+            ], limit=1)
+    if fiscalyears:
+        return fiscalyears[0]
     values = {
-        'name': str(date.year),
-        'start_date': date + relativedelta(month=1, day=1),
-        'end_date': date + relativedelta(month=12, day=31),
+        'name': name,
         'company': company,
+        'start_date': start_date,
+        'end_date': end_date,
         'post_move_sequence': post_move_seq,
     }
     if invoice_sequence is not None:
@@ -136,13 +153,16 @@ def _get_account_by_type(type, company=None):
         return accounts[0]
 
 
-def get_payment_type(name):
+def get_payment_type(name, kind=None):
     PaymentType = Model.get('account.payment.type')
-    existing = PaymentType.find([('name', '=', name)], limit=1)
+    domain = [('name', '=', name)]
+    if kind:
+        domain.append(('kind', '=', 'payable'))
+    existing = PaymentType.find(domain, limit=1)
     if existing:
         return existing[0]
     payment_type = PaymentType(name=name)
-    payment_type.kind = 'receivable'
+    payment_type.kind = kind or 'receivable'
     return payment_type
 
 
@@ -208,3 +228,71 @@ def create_account_chart(company, module=None, fs_id=None, digits=None):
     create_chart.form.account_receivable = receivable
     create_chart.form.account_payable = payable
     create_chart.execute('create_properties')
+
+
+@create_model('account.journal')
+def create_journal(**kwargs):
+    Journal = Model.get('account.journal')
+    domain = []
+    if 'name' in kwargs:
+        domain.append(('name', '=', kwargs.get('name')))
+    if 'code' in kwargs:
+        domain.append(('code', '=', kwargs.get('code')))
+    if domain:
+        journals = Journal.find(domain, limit=1)
+        if journals:
+            return journals[0]
+
+
+@create_model('account.move')
+def create_move(**kwargs):
+    pass
+
+
+@create_model('account.move.line')
+def create_move_line(**kwargs):
+    pass
+
+
+class MonthlyPeriodGetter(OrderedDict):
+    '''
+    Returns the account period of a date.
+    It asumes that Monthly periods are created, and it makes a cache of
+    it to avoid reading values so much time.
+
+    Usage:
+
+        periods = MontlhlyPeriodGetter()
+        p1 = periods.get(date(2015, 1, 1))  #It will fetch from db
+        p2 = periods.get(date(2015, 1, 2))  #It will return from cache
+    '''
+    def __init__(self, *args, **kwargs):
+        super(MonthlyPeriodGetter, self).__init__(*args, **kwargs)
+        if kwargs.get('load', True):
+            Period = Model.get('account.period')
+            periods = Period.find([])
+            for period in periods:
+                key = (period.start_date.year, period.start_date.month)
+                self.__setitem__(key, period)
+
+    def __getitem__(self, key):
+        if (isinstance(key, datetime.date) or
+                isinstance(key, datetime.datetime)):
+            key = (key.year, key.month)
+        return super(MonthlyPeriodGetter, self).__getitem__(key)
+
+    def __missing__(self, key):
+        Period = Model.get('account.period')
+        year, month = key
+        _, last_day = monthrange(year, month)
+        start_date = date(year, month, 1)
+        end_date = date(year, month, last_day)
+        periods = Period.find([
+                ('start_date', '=', start_date),
+                ('end_date', '=', end_date),
+                ], limit=1)
+        if periods:
+            period = periods[0]
+            self.__setitem__(key, period)
+            return period
+        return super(MonthlyPeriodGetter, self).__missing__(key)

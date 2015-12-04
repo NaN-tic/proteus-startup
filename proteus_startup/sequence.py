@@ -5,7 +5,7 @@ from proteus import Model
 __all__ = ['get_sequence']
 
 
-def get_sequence(strict, code, name, prefix=None, suffix=None,
+def get_sequence(strict, code, name=None, prefix=None, suffix=None,
         sequence_type=None, number_increment=None, padding=None, company=None):
     if strict:
         Sequence = Model.get('ir.sequence.strict')
