@@ -17,18 +17,38 @@ __all__ = ['create_account_chart', 'create_fiscal_year',
     'create_move_line']
 
 
+def party_codes():
+    return ('430', '400', '410', '401', '440', '431')
+
+
 def get_code(code, digits=7):
     if len(code) > 4:
-        if code[:3] in ('430', '400', '410', '401', '440', '431'):
+        if code[:3] in party_codes():
             return code[0:4].ljust(len(code), '0')
     return code
 
 
 def get_similar_account(code, chart, digits=7):
-    for digits in (digits, 4, 3, 2, 1):
-        account = chart.get(get_similar_code(chart, code))
-        if account:
-            return account
+
+    if len(code) < digits:
+        for digits in (4, 3, 2, 1):
+            code2 = code[:digits]
+            account = chart.get(code2)
+            if account:
+                break
+
+    if len(code) == digits:
+        # Ensure that we find a valid account
+        for i in range(len(code)):
+            sub_code = code[:-i].ljust(digits, '0')
+            if sub_code in chart:
+                new_account = chart.get(sub_code)
+                if new_account.kind != 'view':
+                    account = new_account
+                    break
+
+    if account:
+        return account
 
 
 def similar_account(sim_account, vals):
@@ -37,7 +57,9 @@ def similar_account(sim_account, vals):
 
     ignore_fields = ['id', 'code', 'name', 'childs', 'deferrals', 'taxes',
         'create_date', 'create_uid', 'write_date', 'write_uid', 'template',
-        'parent']
+        'parent', 'company', 'general_ledger_balance', 'balance', 'credit',
+        'debit', 'right', 'left']
+
     for field in Account._fields:
         if field in ignore_fields:
             continue
@@ -72,14 +94,14 @@ def get_similar_code(chart, code, digits=7):
 def get_chart_tree(company):
     Account = Model.get('account.account')
     accounts = Account.find([('company', '=', company)])
-    return dict((a.code, a) for a in accounts)
+    return dict((str(a.code), a) for a in accounts)
 
 
 @create_model('account.fiscalyear')
-def create_fiscal_year(date, company, post_move_seq, invoice_sequence=None):
+def create_fiscal_year(year, company, post_move_seq, invoice_sequence=None):
     Fiscalyear = Model.get('account.fiscalyear')
-    start_date = date + relativedelta(month=1, day=1)
-    end_date = date + relativedelta(month=12, day=31)
+    start_date = date(year=year, month=1, day=1)
+    end_date = date(year=year, month=12, day=31)
     name = str(date.year)
     fiscalyears = Fiscalyear.find([
             ('name', '=', name),

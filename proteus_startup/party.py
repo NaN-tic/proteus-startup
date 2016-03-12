@@ -5,7 +5,8 @@ from .common import create_model
 
 
 __all__ = ['get_party', 'create_party', 'create_address',
-    'create_contact_mechanism', 'get_parties_by_code']
+    'create_contact_mechanism', 'get_parties_by_code',
+    'contact_mechanisms']
 
 
 @create_model('party.contact_mechanism')
@@ -36,3 +37,14 @@ def get_party(name, no_create=False):
 def get_parties_by_code():
     Party = Model.get('party.party')
     return dict((p.code, p) for p in Party.find([]))
+
+
+def contact_mechanisms(mechanisms, data):
+    contacts = []
+    for field, type in mechanisms:
+        value = data[field]
+        if value:
+            mechanism = create_contact_mechanism(
+                        type=type, value=value)
+            contacts.append(mechanism)
+    return contacts

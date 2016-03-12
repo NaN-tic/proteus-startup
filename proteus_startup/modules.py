@@ -6,7 +6,7 @@ __all__ = ['install_modules']
 
 
 def install_modules(modules):
-    Module = Model.get('ir.module.module')
+    Module = Model.get('ir.module')
 
     assert isinstance(modules, (basestring, list))
     if isinstance(modules, basestring):
@@ -14,6 +14,13 @@ def install_modules(modules):
 
     modules = Module.find([('name', 'in', modules)])
     # 3.6 Module.click(modules, 'install')
-    for module in modules:
-        module.click('install')
-    Wizard('ir.module.module.install_upgrade').execute('upgrade')
+    Module.click(modules, 'install')
+    Wizard('ir.module.install_upgrade').execute('upgrade')
+
+
+def close_config_wizard():
+
+    WizardItem = Model.get('ir.module.config_wizard.item')
+    for item in WizardItem.find([('state', '=', 'open')]):
+        item.state = 'done'
+        item.save()
