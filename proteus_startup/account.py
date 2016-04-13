@@ -102,7 +102,7 @@ def create_fiscal_year(year, company, post_move_seq, invoice_sequence=None):
     Fiscalyear = Model.get('account.fiscalyear')
     start_date = date(year=year, month=1, day=1)
     end_date = date(year=year, month=12, day=31)
-    name = str(date.year)
+    name = str(year)
     fiscalyears = Fiscalyear.find([
             ('name', '=', name),
             ('start_date', '=', start_date),
