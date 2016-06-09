@@ -2,7 +2,8 @@
 # copyright notices and license terms.
 from proteus import config as pconfig
 import os
-__all__ = ['init_database', 'drop_database', 'connect_database']
+__all__ = ['init_database', 'drop_database', 'exist_database',
+    'connect_database']
 
 
 def init_database():
@@ -18,6 +19,11 @@ def drop_database():
     doctest_dropdb(None)
 
 
+def exist_database():
+    from trytond.tests.test_tryton import db_exist
+    return db_exist()
+
+
 def connect_database(database, password='admin', database_type='postgresql'):
-    return pconfig.set_trytond(database, password=password,
-        config_file=os.environ.get('TRYTOND_CONFIG', 'trytond.conf'))
+    return pconfig.set_trytond(database,
+        config_file=os.environ.get('TRYTOND_CONFIG'))
