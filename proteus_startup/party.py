@@ -5,7 +5,7 @@ from .common import create_model
 
 
 __all__ = ['get_party', 'create_party', 'create_address',
-    'create_contact_mechanism', 'get_parties_by_code']
+    'create_contact_mechanism', 'create_party_category', 'get_parties_by_code']
 
 
 @create_model('party.contact_mechanism')
@@ -20,6 +20,11 @@ def create_address(**kwargs):
 
 @create_model('party.party')
 def create_party(**kwargs):
+    pass
+
+
+@create_model('party.category')
+def create_party_category(**kwargs):
     pass
 
 
