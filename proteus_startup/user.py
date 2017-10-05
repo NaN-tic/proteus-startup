@@ -26,9 +26,6 @@ def get_user(login, name, **kargs):
     domain = [
         ('login', '=', login),
         ]
-    main_company = kargs.get('main_company')
-    if main_company:
-        domain.append(('main_company', '=', main_company.id))
     users = User.find(domain)
     if users:
         return users[0]
