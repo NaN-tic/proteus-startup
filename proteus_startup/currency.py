@@ -28,7 +28,7 @@ def get_dollar():
     currency = get_currency('USD')
 
     if not currency:
-        currency = Currency(name='US Dollar', symbol=u'$', code='USD',
+        currency = Currency(name='US Dollar', symbol='$', code='USD',
             rounding=Decimal('0.01'), mon_grouping='[]',
             mon_decimal_point='.')
 
@@ -48,7 +48,7 @@ def get_euro():
     currency = get_currency('EUR')
 
     if not currency:
-        currency = Currency(name='Euro', symbol=u'$', code='EUR',
+        currency = Currency(name='Euro', symbol='$', code='EUR',
             rounding=Decimal('0.01'), mon_grouping='[]',
             mon_decimal_point='.')
 

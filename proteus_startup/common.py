@@ -22,7 +22,7 @@ def create_model(model_name):
             if new_values:
                 values.update(new_values)
             model = cls()
-            for field, value in values.iteritems():
+            for field, value in values.items():
                 if field in cls._fields:
                     if not value:
                         continue

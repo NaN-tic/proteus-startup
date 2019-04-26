@@ -72,7 +72,7 @@ def similar_account(sim_account, vals):
     else:
         account.parent = sim_account
 
-    for k, v in vals.iteritems():
+    for k, v in vals.items():
         setattr(account, k, v)
 
     return account

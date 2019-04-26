@@ -8,8 +8,8 @@ __all__ = ['install_modules']
 def install_modules(modules):
     Module = Model.get('ir.module')
 
-    assert isinstance(modules, (basestring, list))
-    if isinstance(modules, basestring):
+    assert isinstance(modules, (str, list))
+    if isinstance(modules, str):
         modules = modules.split(',')
 
     modules = Module.find([('name', 'in', modules)])
